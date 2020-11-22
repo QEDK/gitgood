@@ -1,3 +1,4 @@
+from logging import exception
 import os
 import typer
 import github
@@ -42,62 +43,87 @@ def callback():
     Here to help! ✨
     """
 @app.command()
-def project(repo_address:str, show_projects:bool = False, show_cards: bool = False):
+def project(repo_address:str, cards: bool = False, project_card: str = ""):
     """This option deals with the repo projects
 
     Args: repo_address (str): Should be in the form of "Username/Repository name", for ex: QEDK/gitgood
         
-        \n\nshow-projects (bool, optional): Enabling this option allows you to view all the projects for the address of the repository provided. \n\nUsage: gg project --show-projects QEDK/gitgood (Defaults to False)
-        \n\nshow-cards (bool, optional): Enabling this option allows you to view all the cards for all the projects in the address of the repository provided. \n\nUsage: gg project --show-cards QEDK/gitgood (Defaults to False)
+        
+        \n\n--show-cards (bool, optional): Enabling this option allows you to view all the cards for all the projects in the address of the repository provided. \n\nUsage: gg project --show-cards QEDK/gitgood (Defaults to False)
+        \n\n--project-card (string, optional): Enabling this allows you to view the card of a particular project. \n\nUsage: gg project QEDK/gitgood --project-card App 
     """
     repo = g.get_repo(repo_address)
     typer.echo("----------------------------------------")
     count = 1
-    if show_projects:
-        for project in repo.get_projects():
-            project_name = project.name
-            typer.echo(f"{count}. {project_name}")
-            count+=1
+    for project in repo.get_projects():
+        project_name = project.name
+        typer.echo(f"{count}. {project_name}")
+        count+=1
     
-    if show_cards:
-        show_card(repo_address)
+    if cards:
+        try:
+            show_card(repo_address)
+        except github.GithubException as e :
+            typer.echo(e)
+    
+    if project_card != "":
+        show_card_number(repo_address, project_card)
+        
 
 
 def show_card(repo_address:str):
     repo = g.get_repo(repo_address)
-    typer.echo("----------------------------------------")
     for project in repo.get_projects():
-        typer.echo(project.name)
-        typer.echo("------------")
+        typer.echo(f"------------\n{project.name}\n------------")
         for column in project.get_columns():
-            typer.echo(column.name)
-            typer.echo("------------")
+            typer.echo(f"{column.name} \n------------")
             for card in column.get_cards():
-                url = card.get_content().url
-                slash_count = 0
-                for ch in url:
-                    if slash_count == 6:
-                        break
-                    if ch == '/':
-                        slash_count += 1
-                if ch == 'p':
-                    typer.echo("Pull Request:")
-                elif ch == 'i':
-                    typer.echo("Issue:")
+                flag = 0
+                for ch in card.get_content().body:
+                    if ch == '#':
+                        flag = 1
+                if flag == 1:
+                    body = f"\nPull Request:\n"
+                else:
+                    body = f"\nIssue:\n"
+                body += f"\nTitle: {card.get_content().title}"
+                if card.get_content().assignee == None:
+                    pass
+                else:
+                    body += f"\n\nAssignee: {card.get_content().assignee.login}"
+                body += f"\n\nLabels:"
+                for label in card.get_content().labels:
+                        body += f"\n{label.name}"
+                body += f"\n\n{card.get_content().body}\n------------"
+                typer.echo(body)
+
+
+def show_card_number(repo_address: str, project_name: str):
+    repo = g.get_repo(repo_address)
+    for project in repo.get_projects():
+        if project.name == project_name:
+            typer.echo(f"------------\n{project.name}\n------------")
+            for column in project.get_columns():
+                typer.echo(f"{column.name} \n------------")
+                for card in column.get_cards():
+                    flag = 0
+                    for ch in card.get_content().body:
+                        if ch == '#':
+                            flag = 1
+                    if flag == 1:
+                        body = f"Pull Request:\n"
+                    else:
+                        body = f"Issue:\n"
+                    body += f"\nTitle: {card.get_content().title}"
                     if card.get_content().assignee == None:
                         pass
                     else:
-                        typer.echo(f"Assignee: {card.get_content().assignee.login}")
-                else:
-                    typer.echo("Note:")
-                typer.echo(card.get_content().title)
-                typer.echo("Labels:")
-                for label in card.get_content().labels:
-                        typer.echo(label.name)
-                typer.echo(card.get_content().body)
-                typer.echo("------------")
-            typer.echo("------------")
-
+                        body += f"\n\nAssignee: {card.get_content().assignee.login}"
+                    body += f"\n\nLabels:"
+                    for label in card.get_content().labels:
+                            body += f"\n{label.name}"
+                    body += f"\n\n{card.get_content().body}\n------------"
+                    typer.echo(body)
 
 if __name__ == "__main__":
     app()
