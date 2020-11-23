@@ -1,4 +1,3 @@
-import notification as notification
 from github import Github
 from datetime import datetime
 from datetime import date
