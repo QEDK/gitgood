@@ -12,29 +12,27 @@ user = g.get_user()
 app = typer.Typer()
 
 
-@app.command()
 def notifs(limit: Optional[int] = typer.Argument(sys.maxsize)):
     today = date.today()
-    notification = user.get_notifications(participating=True, since=datetime(2019, 11, 7),
+    message = ""
+    notification = user.get_notifications(participating=True,
                                           before=datetime(today.year, today.month, today.day))
-    for notif in notification:
-        typer.secho(f"{notif.subject.title}", fg=typer.colors.MAGENTA)
-        limit -= 1
-        if limit == 0:
-            break
+    for notif in notification[:limit]:
+        message += notif.subject.title
+        message += "\n"
+    typer.secho(f"{message}", fg=typer.colors.MAGENTA)
 
 
 @app.command()
 def read(limit: Optional[int] = typer.Argument(sys.maxsize)):
     today = date.today()
-    unread_notification = user.get_notifications(participating=True, since=datetime(2019, 11, 7),
+    message = ""
+    unread_notification = user.get_notifications(participating=True,
                                                  before=datetime(today.year, today.month, today.day))
-    for notif in unread_notification:
+    for notif in unread_notification[:limit]:
         notif.mark_as_read()
-        typer.secho(f"Marked as Read.", fg=typer.colors.BRIGHT_CYAN)
-        limit -= 1
-        if limit == 0:
-            break
+        message += "Marked as Read \n"
+    typer.secho(f"Marked as Read.", fg=typer.colors.BRIGHT_CYAN)
 
 
 if __name__ == "__main__":
