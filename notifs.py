@@ -31,7 +31,7 @@ def read(limit: Optional[int] = typer.Argument(sys.maxsize)):
                                                  before=datetime(today.year, today.month, today.day))
     for notif in unread_notification:
         notif.mark_as_read()
-        typer.secho(f"Marked as Read.", fg=typer.colors.MAGENTA)
+        typer.secho(f"Marked as Read.", fg=typer.colors.BRIGHT_CYAN)
         limit -= 1
         if limit == 0:
             break
