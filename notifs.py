@@ -22,7 +22,7 @@ def notifs(limit: int):
         if limit == 0:
             break
         for notif in notifs:
-            typer.secho(f"{notif}", fg=typer.colors.MAGENTA)
+            typer.secho(f"{notif.subject.title}", fg=typer.colors.MAGENTA)
             limit -= 1
             if limit == 0:
                 break
@@ -35,7 +35,7 @@ def getAllNotifs():
         notifs = repos.get_notifications(all=False, participating=True, since=datetime(2019, 11, 7),
                                          before=datetime(2020, 11, 21))
         for notif in notifs:
-            typer.secho(f"{notif}", fg=typer.colors.MAGENTA)
+            typer.secho(f"{notif.subject.title}", fg=typer.colors.MAGENTA)
 
 
 @app.command()
