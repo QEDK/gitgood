@@ -25,27 +25,16 @@ def notifs(limit: Optional[int] = typer.Argument(sys.maxsize)):
 
 
 @app.command()
-def read(limit: int):
+def read(limit: Optional[int] = typer.Argument(sys.maxsize)):
     today = date.today()
-    repos = user.get_repos(type="all", sort="updated", direction="asc")
-    for repo in repos:
-        notifications = repo.get_notifications(all=False, participating=True, since=datetime(2019, 11, 7),
-                                               before=datetime(today.year, today.month, today.day))
+    unread_notification = user.get_notifications(participating=True, since=datetime(2019, 11, 7),
+                                                 before=datetime(today.year, today.month, today.day))
+    for notif in unread_notification:
+        notif.mark_as_read()
+        typer.secho(f"Marked as Read.", fg=typer.colors.MAGENTA)
+        limit -= 1
         if limit == 0:
             break
-        for notif in notifications:
-            if notif.unread is False:
-                notif.mark_as_read()
-            typer.secho(f"Done", fg=typer.colors.BRIGHT_YELLOW)
-            limit -= 1
-            if limit == 0:
-                break
-
-
-@app.command()
-def markrepoasread(repo_name: str):
-    repo = g.get_repo(repo_name)
-    repo.mark_notifications_as_read()
 
 
 if __name__ == "__main__":
