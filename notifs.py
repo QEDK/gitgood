@@ -35,7 +35,7 @@ def getAllNotifs():
         notifs = repos.get_notifications(all=False, participating=True, since=datetime(2019, 11, 7),
                                          before=datetime(2020, 11, 21))
         for notif in notifs:
-            typer.echo(notif)
+            typer.secho(notif, fg=typer.colors.MAGENTA)
 
 
 @app.command()
