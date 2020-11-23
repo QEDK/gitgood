@@ -2,6 +2,8 @@ from github import Github
 from datetime import datetime
 from datetime import date
 import typer
+from typing import Optional
+import sys
 
 username = {username}
 g = Github({accesstoken})
@@ -10,15 +12,15 @@ app = typer.Typer()
 
 
 @app.command()
-def notifs(limit: int):
+def notifs(limit: Optional[int] = typer.Argument(sys.maxsize)):
     today = date.today()
     repos = user.get_repos(type="all", sort="updated", direction="asc")
     for repo in repos:
-        notifs = repo.get_notifications(all=False, participating=True, since=datetime(2019, 11, 7),
-                                        before=datetime(today.year, today.month, today.day))
+        notifications = repo.get_notifications(all=False, participating=True, since=datetime(2019, 11, 7),
+                                               before=datetime(today.year, today.month, today.day))
         if limit == 0:
             break
-        for notif in notifs:
+        for notif in notifications:
             typer.secho(f"{notif.subject.title}", fg=typer.colors.MAGENTA)
             limit -= 1
             if limit == 0:
@@ -26,25 +28,15 @@ def notifs(limit: int):
 
 
 @app.command()
-def allnotifs():
-    today = date.today()
-    for repos in user.get_subscriptions():
-        notifs = repos.get_notifications(all=False, participating=True, since=datetime(2019, 11, 7),
-                                         before=datetime(today.year, today.month, today.day))
-        for notif in notifs:
-            typer.secho(f"{notif.subject.title}", fg=typer.colors.BRIGHT_CYAN)
-
-
-@app.command()
 def read(limit: int):
     today = date.today()
     repos = user.get_repos(type="all", sort="updated", direction="asc")
     for repo in repos:
-        notifs = repo.get_notifications(all=False, participating=True, since=datetime(2019, 11, 7),
-                                        before=datetime(today.year, today.month, today.day))
+        notifications = repo.get_notifications(all=False, participating=True, since=datetime(2019, 11, 7),
+                                               before=datetime(today.year, today.month, today.day))
         if limit == 0:
             break
-        for notif in notifs:
+        for notif in notifications:
             if notif.unread is False:
                 notif.mark_as_read()
             typer.secho(f"Done", fg=typer.colors.BRIGHT_YELLOW)
