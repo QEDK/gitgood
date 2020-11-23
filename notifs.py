@@ -1,3 +1,4 @@
+import notification as notification
 from github import Github
 from datetime import datetime
 from datetime import date
@@ -6,25 +7,21 @@ from typing import Optional
 import sys
 
 username = {username}
-g = Github({accesstoken})
-user = g.get_user(username)
+g = Github({token})
+user = g.get_user()
 app = typer.Typer()
 
 
 @app.command()
 def notifs(limit: Optional[int] = typer.Argument(sys.maxsize)):
     today = date.today()
-    repos = user.get_repos(type="all", sort="updated", direction="asc")
-    for repo in repos:
-        notifications = repo.get_notifications(all=False, participating=True, since=datetime(2019, 11, 7),
-                                               before=datetime(today.year, today.month, today.day))
+    notification = user.get_notifications(participating=True, since=datetime(2019, 11, 7),
+                                          before=datetime(today.year, today.month, today.day))
+    for notif in notification:
+        typer.secho(f"{notif.subject.title}", fg=typer.colors.MAGENTA)
+        limit -= 1
         if limit == 0:
             break
-        for notif in notifications:
-            typer.secho(f"{notif.subject.title}", fg=typer.colors.MAGENTA)
-            limit -= 1
-            if limit == 0:
-                break
 
 
 @app.command()
