@@ -5,8 +5,8 @@ from datetime import datetime
 from datetime import date
 import typer
 
-username = "korusuke"
-g = Github("ed8c563691a672782c935d8f635e7b11e3744488")
+username = ({username})
+g = Github({accesstoken})
 user = g.get_user(username)
 app = typer.Typer()
 
