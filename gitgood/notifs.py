@@ -46,7 +46,6 @@ except Exception:
 
 g = Github(access_token)
 user = g.get_user()
-app = typer.Typer()
 
 
 @app.callback()
@@ -54,6 +53,9 @@ def callback():
     """
     Here to help! ✨
     """
+
+
+app = typer.Typer()
 
 
 @app.command()
