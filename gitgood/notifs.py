@@ -59,7 +59,7 @@ app = typer.Typer()
 
 
 @app.command()
-def notifs(limit: Optional[int] = typer.Argument(sys.maxsize)):
+def notifs(limit: Optional[int] = typer.Argument(sys.maxsize), read: int = 0):
     today = date.today()
     message = ""
     notification = user.get_notifications(participating=True,
@@ -70,7 +70,6 @@ def notifs(limit: Optional[int] = typer.Argument(sys.maxsize)):
     typer.secho(f"{message}", fg=typer.colors.MAGENTA)
 
 
-@app.command()
 def read(limit: Optional[int] = typer.Argument(sys.maxsize)):
     today = date.today()
     message = ""
@@ -80,6 +79,21 @@ def read(limit: Optional[int] = typer.Argument(sys.maxsize)):
         notif.mark_as_read()
         message += "Marked as Read. \n"
     typer.secho(f"{message}", fg=typer.colors.BRIGHT_CYAN)
+
+
+@app.command()
+def reponotifs(repo_name: str, limit: Optional[int] = typer.Argument(sys.maxsize)):
+    try:
+        repo = g.get_user().get_repo(repo_name)
+    except github.GithubException as e:
+        typer.secho("Invalid Repository Name", err=True, fg=typer.colors.RED)
+        raise typer.Exit(1)
+    message = ""
+    notification = repo.get_notifications()
+    for notif in notification[:limit]:
+        message += notif.subject.title
+        message += "\n"
+    typer.secho(f"{message}", fg=typer.colors.MAGENTA)
 
 
 if __name__ == "__main__":
