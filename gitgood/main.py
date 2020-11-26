@@ -7,6 +7,10 @@ from pathlib import Path
 from github import Github
 from typer import colors
 from typer.colors import BRIGHT_RED
+from datetime import datetime
+from datetime import date
+from typing import Optional
+import sys
 
 app = typer.Typer()
 
@@ -43,7 +47,7 @@ except Exception:
     typer.secho(
         "Your token has been stored successfully. 🚀", fg=typer.colors.GREEN, bold=True
     )
-
+access_token = "fa4a61665550cc586435d66db5d55925c19c6970"
 g = Github(access_token)
 
 
@@ -65,7 +69,18 @@ def project(
     cards (bool, optional): This option lets you view all the cards of all the projects. Defaults to False\n
     project-card (string, optional): This lets you view the card of a particular project. Defaults to "".
     """
-    repo = g.get_repo(repo_address)
+    try:
+        repo = g.get_repo(repo_address)
+    except github.GithubException as e:
+        error_message = "\n------------------------------------------------\n"
+        error_message += typer.style(
+            "Invalid username or repository name, please try again!!",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        error_message += "\n------------------------------------------------\n"
+        typer.echo(error_message, err=True)
+        raise typer.Exit(1)
     project_list = "------------------------------------------------"
     project_list += typer.style("\nAll Projects:\n", fg=typer.colors.GREEN, bold=True)
     count = 1
@@ -74,15 +89,25 @@ def project(
         project_list += f"\n{count}. {project_name}"
         count += 1
     project_list += "\n"
+    if cards == False and project_card == "" and move == 0:
+        typer.echo(project_list)
 
     if cards:
         try:
             show_card(repo_address, project_list)
         except github.GithubException as e:
-            typer.echo(e)
+            error_message = "\n------------------------------------------------\n"
+            error_message += typer.style(
+                "Invalid username or repository name, please try again!!",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            error_message += "\n------------------------------------------------\n"
+            typer.echo(error_message, err=True)
+            raise typer.Exit(1)
 
     if project_card != "":
-        show_card_number(repo_address, project_card)
+        show_card_number(repo_address, project_card, project_list)
 
     if move != 0:
         move_card(repo_address, move)
@@ -105,11 +130,13 @@ def show_card(repo_address: str, project_list: str):
     typer.echo(body)
 
 
-def show_card_number(repo_address: str, project_name: str):
+def show_card_number(repo_address: str, project_name: str, project_list: str):
+    flag = False
     body = ""
     repo = g.get_repo(repo_address)
     for project in repo.get_projects():
         if project.name == project_name:
+            flag = True
             body += "\n------------------------------------------------\n"
             body += typer.style(f"Project Name: ", fg=typer.colors.GREEN, bold=True)
             body += typer.style(project.name, fg=typer.colors.BRIGHT_RED, bold=True)
@@ -119,8 +146,6 @@ def show_card_number(repo_address: str, project_name: str):
                 body += typer.style(
                     f"\n{count}.{column.name}", fg=typer.colors.CYAN, bold=True
                 )
-                body += typer.style("\n\nColumn ID: ", fg=typer.colors.GREEN)
-                body += typer.style(f"{column.id}\n")
                 body += "\n------------------------------------------------\n"
                 count += 1
                 for card in column.get_cards():
@@ -171,17 +196,30 @@ def show_card_number(repo_address: str, project_name: str):
                             f"\n\n{card.get_content().body}", fg=typer.colors.WHITE
                         )
                         body += "\n\n------------------------------------------------\n"
-
+    if flag:
+        pass
+    else:
+        error_message = "\n------------------------------------------------"
+        error_message += typer.style(
+            "\nInvalid Project Name!!\nChoose one from the list given below!\n",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        error_message += project_list
+        typer.echo(error_message)
+        raise typer.Exit(1)
     typer.echo(body)
 
 
 def move_card(repo_address: str, card_id: int):
+    flag = False
     body = ""
     repo = g.get_repo(repo_address)
     for project in repo.get_projects():
         for column in project.get_columns():
             for card in column.get_cards():
                 if card.id == card_id:
+                    flag = True
                     body += typer.style(
                         "\n\nCurrently the card is located in: ", fg=typer.colors.GREEN
                     )
@@ -197,9 +235,85 @@ def move_card(repo_address: str, card_id: int):
                     for columnName in project.get_columns():
                         if column_name == columnName.name:
                             card.move("top", columnName.id)
+    if flag:
+        pass
+    else:
+        error_message = "\n------------------------------------------------"
+        error_message += typer.style(
+            "\nInvalid Card ID!!\n\n", fg=typer.colors.RED, bold=True
+        )
+        project_card_message = typer.style(
+            "--project-card", fg=typer.colors.GREEN, bold=True
+        )
+        error_message += typer.style(
+            f"Please use the {project_card_message} option to get the correct Card ID\n"
+        )
+        error_message += "------------------------------------------------\n"
+        typer.echo(error_message)
+        raise typer.Exit(1)
     finish_text = typer.style("\nCard Moved Successfully!", fg=typer.colors.YELLOW)
     finish_text += "\n\n------------------------------------------------\n\n"
     typer.echo(finish_text)
+
+
+user = g.get_user()
+
+
+@app.command()
+def notifs(
+    limit: Optional[int] = typer.Argument(sys.maxsize),
+    read: str = "",
+    repo_notifs: str = "",
+):
+    today = date.today()
+    message = ""
+    notification = user.get_notifications(
+        participating=True, before=datetime(today.year, today.month, today.day)
+    )
+    if read == "" and repo_notifs == "":
+        if notification.totalCount != 0:
+            for notif in notification[:limit]:
+                message += notif.subject.title
+                message += "\n"
+            typer.secho(f"{message}", fg=typer.colors.BRIGHT_CYAN)
+        else:
+            typer.echo("NO NOTIFS")
+    if read != "":
+        read_notif(read)
+    if repo_notifs != "":
+        reponotifs(repo_notifs)
+
+
+def read_notif(read: str):
+    today = date.today()
+    message = ""
+    unread_notification = user.get_notifications(
+        participating=True, before=datetime(today.year, today.month, today.day)
+    )
+    if read == "A":
+        for notif in unread_notification:
+            notif.mark_as_read()
+            message += "Marked as Read. \n"
+        typer.secho(f"{message}", fg=typer.colors.BRIGHT_CYAN)
+    else:
+        for notif in unread_notification[: int(read)]:
+            notif.mark_as_read()
+            message += "Marked as Read. \n"
+        typer.secho(f"{message}", fg=typer.colors.BRIGHT_CYAN)
+
+
+def reponotifs(repo_name: str):
+    try:
+        repo = g.get_user().get_repo(repo_name)
+    except github.GithubException as e:
+        typer.secho("Invalid Repository Name", err=True, fg=typer.colors.RED)
+        raise typer.Exit(1)
+    message = ""
+    notification = repo.get_notifications()
+    for notif in notification:
+        message += notif.subject.title
+        message += "\n"
+    typer.secho(f"{message}", fg=typer.colors.BRIGHT_CYAN)
 
 
 if __name__ == "__main__":
