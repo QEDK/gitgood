@@ -47,7 +47,7 @@ except Exception:
     typer.secho(
         "Your token has been stored successfully. 🚀", fg=typer.colors.GREEN, bold=True
     )
-access_token = "fa4a61665550cc586435d66db5d55925c19c6970"
+    
 g = Github(access_token)
 
 
