@@ -1,12 +1,9 @@
-from logging import exception
 import os
 import typer
 import github
 from dotenv import load_dotenv
 from pathlib import Path
 from github import Github
-from typer import colors
-from typer.colors import BRIGHT_RED
 from datetime import datetime
 from datetime import date
 from typing import Optional
@@ -32,12 +29,10 @@ except Exception:
         err=True,
         fg=typer.colors.RED,
     )
-    typer.echo(
-        (
-            "ℹ You can fetch or generate a new token from https://github.com/settings/tokens\n"
-            "You will need to grant the repo, notification, user scopes for gitgood to work properly."
-        )
-    )
+    typer.echo((
+        "ℹ You can fetch or generate a new token from https://github.com/settings/tokens\n"
+        "You will need to grant the repo, notification, user scopes for gitgood to work properly."
+    ))
     access_token = typer.prompt(
         "Enter your personal access token to continue (for safety, it won't show)",
         hide_input=True,
@@ -65,12 +60,12 @@ def project(
 
     Args:
     repo_address (str): user_name/repository_name\n
-    cards (bool, optional): This option lets you view all the cards of all the projects. Defaults to False\n
-    project-card (string, optional): This lets you view the card of a particular project. Defaults to "".
+    cards (bool, optional): This option lets you view the columns the projects. Defaults to False\n
+    project-card (string, optional): This lets you view the cards of a particular project.
     """
     try:
         repo = g.get_repo(repo_address)
-    except github.GithubException as e:
+    except github.GithubException:
         error_message = "\n------------------------------------------------\n"
         error_message += typer.style(
             "Invalid username or repository name, please try again!!",
@@ -88,13 +83,13 @@ def project(
         project_list += f"\n{count}. {project_name}"
         count += 1
     project_list += "\n"
-    if columns == False and project_card == "" and move == 0:
+    if columns is False and project_card == "" and move == 0:
         typer.echo(project_list)
 
     if columns:
         try:
             show_card(repo_address, project_list)
-        except github.GithubException as e:
+        except github.GithubException:
             error_message = "\n------------------------------------------------\n"
             error_message += typer.style(
                 "Invalid username or repository name, please try again!!",
@@ -137,7 +132,7 @@ def show_card_number(repo_address: str, project_name: str, project_list: str):
         if project.name == project_name:
             flag = True
             body += "\n------------------------------------------------\n"
-            body += typer.style(f"Project Name: ", fg=typer.colors.GREEN, bold=True)
+            body += typer.style("Project Name: ", fg=typer.colors.GREEN, bold=True)
             body += typer.style(project.name, fg=typer.colors.BRIGHT_RED, bold=True)
             body += "\n------------------------------------------------\n"
             count = 1
@@ -164,28 +159,28 @@ def show_card_number(repo_address: str, project_name: str, project_list: str):
                                 flag = 1
                         if flag == 1:
                             body += typer.style(
-                                f"\nPull Request:\n", fg=typer.colors.BRIGHT_MAGENTA
+                                "\nPull Request:\n", fg=typer.colors.BRIGHT_MAGENTA
                             )
                         else:
                             body += typer.style(
-                                f"\nIssue:\n", fg=typer.colors.BRIGHT_MAGENTA, bold=True
+                                "\nIssue:\n", fg=typer.colors.BRIGHT_MAGENTA, bold=True
                             )
                         body += typer.style("\n\nCard ID: ", fg=typer.colors.GREEN)
                         body += typer.style(str(card.id))
-                        body += typer.style(f"\n\nTitle: ", fg=typer.colors.GREEN)
+                        body += typer.style("\n\nTitle: ", fg=typer.colors.GREEN)
                         body += typer.style(
                             card.get_content().title, fg=typer.colors.WHITE
                         )
-                        if card.get_content().assignee == None:
+                        if card.get_content().assignee is None:
                             pass
                         else:
                             body += typer.style(
-                                f"\n\nAssignee: ", fg=typer.colors.GREEN
+                                "\n\nAssignee: ", fg=typer.colors.GREEN
                             )
                             body += typer.style(
                                 card.get_content().assignee.login, fg=typer.colors.WHITE
                             )
-                        body += typer.style(f"\n\nLabels: ", fg=typer.colors.GREEN)
+                        body += typer.style("\n\nLabels: ", fg=typer.colors.GREEN)
                         for label in card.get_content().labels:
                             body += typer.style(
                                 f"{label.name}\t", fg=typer.colors.WHITE
@@ -267,8 +262,8 @@ def notifs(
     """This command deals with the notifications
 
     Args:
-        limit (Optional[int], optional): Number of notifications to be printed. Defaults to typer.Argument(sys.maxsize).\n
-    read (str, optional): Option to mark notifications as read('A' for all or <x> for 'x' notifications to be marked). Defaults to "".\n
+        limit (Optional[int], optional): Number of notifications to be printed.\n
+    read (str, optional): Option to mark notifications as read.\n
     repo_notifs (str): Show notifications of a particular repository. Defaults to "".
     """
     today = date.today()
@@ -279,7 +274,10 @@ def notifs(
     if read == "" and repo_notifs == "":
         if notification.totalCount != 0:
             for notif in notification[:limit]:
-                message += typer.style(notif.subject.title, fg= typer.colors.BRIGHT_CYAN)
+                notif_details = typer.style(f"{notif.repository.name}: ", fg=typer.colors.GREEN)
+                notif_details += typer.style(f"{notif.subject.type}: ")
+                notif_details += typer.style(f"{notif.subject.title}", fg=typer.colors.BRIGHT_CYAN)
+                message += notif_details
                 message += "\n"
             message += "\n------------------------------------------------\n\n"
             typer.echo(f"{message}")
@@ -305,13 +303,13 @@ def read_notif(read: str):
     if read == "A":
         for notif in unread_notification:
             notif.mark_as_read()
-        message += typer.style("Marked as Read. \n",fg=typer.colors.BRIGHT_CYAN)
+        message += typer.style("Marked as Read. \n", fg=typer.colors.BRIGHT_CYAN)
         message += "\n------------------------------------------------\n\n"
         typer.echo(f"{message}")
     else:
         for notif in unread_notification[: int(read)]:
             notif.mark_as_read()
-        message += typer.style("Marked as Read. \n",fg=typer.colors.BRIGHT_CYAN)
+        message += typer.style("Marked as Read. \n", fg=typer.colors.BRIGHT_CYAN)
         message += "\n------------------------------------------------\n\n"
         typer.echo(f"{message}")
 
@@ -319,7 +317,7 @@ def read_notif(read: str):
 def reponotifs(repo_name: str):
     try:
         repo = g.get_user().get_repo(repo_name)
-    except github.GithubException as e:
+    except github.GithubException:
         typer.secho("Invalid Repository Name", err=True, fg=typer.colors.RED)
         raise typer.Exit(1)
     message = "\n------------------------------------------------\n\n"
