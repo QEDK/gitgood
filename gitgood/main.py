@@ -47,7 +47,6 @@ except Exception:
     typer.secho(
         "Your token has been stored successfully. 🚀", fg=typer.colors.GREEN, bold=True
     )
-    
 g = Github(access_token)
 
 
@@ -60,7 +59,7 @@ def callback():
 
 @app.command()
 def project(
-    repo_address: str, cards: bool = False, project_card: str = "", move: int = 0
+    repo_address: str, columns: bool = False, project_card: str = "", move: int = 0
 ):
     """This command helps you view details about the projects
 
@@ -89,10 +88,10 @@ def project(
         project_list += f"\n{count}. {project_name}"
         count += 1
     project_list += "\n"
-    if cards == False and project_card == "" and move == 0:
+    if columns == False and project_card == "" and move == 0:
         typer.echo(project_list)
 
-    if cards:
+    if columns:
         try:
             show_card(repo_address, project_list)
         except github.GithubException as e:
@@ -265,19 +264,32 @@ def notifs(
     read: str = "",
     repo_notifs: str = "",
 ):
+    """This command deals with the notifications
+
+    Args:
+        limit (Optional[int], optional): Number of notifications to be printed. Defaults to typer.Argument(sys.maxsize).\n
+    read (str, optional): Option to mark notifications as read('A' for all or <x> for 'x' notifications to be marked). Defaults to "".\n
+    repo_notifs (str): Show notifications of a particular repository. Defaults to "".
+    """
     today = date.today()
-    message = ""
+    message = "\n------------------------------------------------\n\n"
     notification = user.get_notifications(
-        participating=True, before=datetime(today.year, today.month, today.day)
+        before=datetime(today.year, today.month, today.day)
     )
     if read == "" and repo_notifs == "":
         if notification.totalCount != 0:
             for notif in notification[:limit]:
-                message += notif.subject.title
+                message += typer.style(notif.subject.title, fg= typer.colors.BRIGHT_CYAN)
                 message += "\n"
-            typer.secho(f"{message}", fg=typer.colors.BRIGHT_CYAN)
+            message += "\n------------------------------------------------\n\n"
+            typer.echo(f"{message}")
         else:
-            typer.echo("NO NOTIFS")
+            else_message = "\n------------------------------------------------\n\n"
+            else_message += typer.style(
+                "No new notifications!\n", fg=typer.colors.GREEN, bold=True
+            )
+            else_message += "\n------------------------------------------------\n\n"
+            typer.echo(else_message)
     if read != "":
         read_notif(read)
     if repo_notifs != "":
@@ -286,20 +298,22 @@ def notifs(
 
 def read_notif(read: str):
     today = date.today()
-    message = ""
+    message = "\n------------------------------------------------\n\n"
     unread_notification = user.get_notifications(
-        participating=True, before=datetime(today.year, today.month, today.day)
+        before=datetime(today.year, today.month, today.day)
     )
     if read == "A":
         for notif in unread_notification:
             notif.mark_as_read()
-            message += "Marked as Read. \n"
-        typer.secho(f"{message}", fg=typer.colors.BRIGHT_CYAN)
+        message += typer.style("Marked as Read. \n",fg=typer.colors.BRIGHT_CYAN)
+        message += "\n------------------------------------------------\n\n"
+        typer.echo(f"{message}")
     else:
         for notif in unread_notification[: int(read)]:
             notif.mark_as_read()
-            message += "Marked as Read. \n"
-        typer.secho(f"{message}", fg=typer.colors.BRIGHT_CYAN)
+        message += typer.style("Marked as Read. \n",fg=typer.colors.BRIGHT_CYAN)
+        message += "\n------------------------------------------------\n\n"
+        typer.echo(f"{message}")
 
 
 def reponotifs(repo_name: str):
@@ -308,12 +322,13 @@ def reponotifs(repo_name: str):
     except github.GithubException as e:
         typer.secho("Invalid Repository Name", err=True, fg=typer.colors.RED)
         raise typer.Exit(1)
-    message = ""
+    message = "\n------------------------------------------------\n\n"
     notification = repo.get_notifications()
     for notif in notification:
-        message += notif.subject.title
+        message += typer.style(notif.subject.title, fg=typer.colors.BRIGHT_CYAN)
         message += "\n"
-    typer.secho(f"{message}", fg=typer.colors.BRIGHT_CYAN)
+    message += "\n------------------------------------------------\n\n"
+    typer.echo(f"{message}")
 
 
 if __name__ == "__main__":
