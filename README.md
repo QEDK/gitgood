@@ -135,14 +135,8 @@ $ gg notifs --repo-notifs gitgood
 * [Poetry](https://python-poetry.org/) - Packaging and publishing
 
 ## License
-Licensed under either of
 
- * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
- * Lesser General Public license v3.0 or later ([LICENSE-LGPL](LICENSE-LGPL) or https://www.gnu.org/licenses/lgpl-3.0.html)
-
-at your option.
-
-The documentation is released under the [GFDL license v1.3](https://www.gnu.org/licenses/fdl-1.3.html) or later.
+This project is released under a free and open-source software license, Apache License 2.0 or later ([LICENSE](LICENSE) or https://www.apache.org/licenses/LICENSE-2.0). The documentation is also released under a free documentation license, namely the [GFDL v1.3](https://www.gnu.org/licenses/fdl-1.3.en.html) license or later.
 
 ### Contribution
 
