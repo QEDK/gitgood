@@ -42,9 +42,11 @@ Arguments: repo_address : this is the address of the repository in the form of u
 
 2. Notification management: The command "notifs" deals with the tasks related to notifications.
 
-Arguments: 1 [LIMIT] (type: int) : This argument is OPTIONAL and prints only [LIMIT] no of notifications
-           2 read(type: string) : This is used to mark a specific no. of notifications as READ. Use 'A' for all notifications or any
-           3 repo-notif (type: string): This prints all the notifications in the repository mentioned in the argument. 
+Arguments: This command have following arguments.
+
+- [LIMIT] (type: int) : This argument is OPTIONAL and prints only [LIMIT] no of notifications.
+- read(type: string) : This is used to mark a specific no. of notifications as READ. Use 'A' for all notifications or any.
+- repo-notif (type: string): This prints all the notifications in the repository mentioned in the argument.
 
 ### Printing all the projects in the given repository.
 
