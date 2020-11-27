@@ -4,33 +4,64 @@ A Git CLI designed for efficent project management
 
 ## 🙋 Why did we make this?
 
-While GitHub CLI is a fantastic developer tool that dramatically simplifies collaboration on a project, it lacks several features. We have to rely on the GUI to use them, such as Github projects and notifications.
+While the vanilla GitHub CLI is a fantastic developer tool that dramatically simplifies collaboration on a project, it lacks several features. We have to rely on the GUI to use some of them, such as Github projects and notifications.
 
-The lack of these features was our motivation to build this project so that not only us but thousands of other CLI-loving dev can make there "Git" experience "good".
+The lack of these features was our motivation to build this project so that not only us but thousands of other CLI-loving devs can make their "Git" experience truly "good".
 
 ## 👷 Who are we?
 
 This package was built by [Rohan Rout](https://github.com/routrohan), [Ali Farhan Hassan Kiyani](https://github.com/farhan2742), [Sakshi Rambhia](https://github.com/Sakshi16) and [Ankit Maity](https://github.com/QEDK).
 
-## Getting Started
+## 👶 Getting Started
+### 🧩 Prerequisites
+You'll need to have Python (>= 3.7) and `pip` to get started. If you don't have them installed already, see the [official docs](https://www.python.org/downloads/release/python-379)!
 
-These instructions will help you get started with using GitGood and making project management on github through cli a breeze.
+Once you're done, move on to the next steps below. ⬇
 
-### Prerequisites
-
-* python 3
-
-### Basic configuration
-
-
-
-### Installation
-It is recommended you use a virtual environment for building the project (such as Python's `venv` or the `virtualenv` module) to easily manage dependencies.
+### 🛠 Installation
 ```bash
-$ git clone git@github.com:QEDK/goodbot.git
-$ cd goodbot
-$ pip3 install -r requirements.txt
+$ pip install gitgood
 ```
+Yep, that's it. ⚡
+
+After installation, check if `gg` is actually up and running like:
+```bash
+$ gg
+Usage: gg [OPTIONS] COMMAND [ARGS]...
+
+  Here to help! ✨
+
+  ...
+```
+And you're set! 🚀
+
+### ⚙ Basic configuration
+You'll need your GitHub personal access token to make use of the CLI. You can make a new token [here](https://github.com/settings/tokens).
+
+If you already have one, you can make a `.gg` file in your home folder like this (recommended):
+```INI
+GG_PAT=<your super secret token>
+```
+And the CLI will automatically pick it up, or you can set the `GG_PAT` environment variable yourself.
+
+If this is all too much, don't fret! The first time you run `gg` on the CLI, you'll get instructions on how to make one. Easy-peezy, lemon-squeezy. 🍋
+
+### 🧱 Building from source
+It is highly recommended you use Poetry or virtual environments for building the project (such as Python's `venv` or the `virtualenv` module) to easily manage dependencies.
+```bash
+$ git clone git@github.com:QEDK/gitgood.git
+$ cd gitgood
+$ pip3 install poetry
+$ poetry install
+$ poetry shell
+```
+Or if you prefer it hardball, just do `pip3 install -r requirements.txt`.
+
+You can also use `poetry` to build the binaries:
+```bash
+$ poetry build
+```
+You're now ready to work on `gitgood`! 🥳
 
 ## User Guide
 
@@ -134,18 +165,8 @@ $ gg notifs --repo-notifs gitgood
 * [flask8](https://pypi.org/project/flake8/) - Linting tool
 * [Poetry](https://python-poetry.org/) - Packaging and publishing
 
-## License
-Licensed under either of
+## 📜 License
+This project is released under a free and open-source software license, Apache License 2.0 or later ([LICENSE](LICENSE) or https://www.apache.org/licenses/LICENSE-2.0). The documentation is also released under a free documentation license, namely the [GFDL v1.3](https://www.gnu.org/licenses/fdl-1.3.en.html) license or later.
 
- * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
- * Lesser General Public license v3.0 or later ([LICENSE-LGPL](LICENSE-LGPL) or https://www.gnu.org/licenses/lgpl-3.0.html)
-
-at your option.
-
-The documentation is released under the [GFDL license v1.3](https://www.gnu.org/licenses/fdl-1.3.html) or later.
-
-### Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the LGPL-3.0 license, shall be dual licensed as above, without any
-additional terms or conditions.
+### 🖊️ Contributions
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be licensed as above, without any additional terms or conditions.
